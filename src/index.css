@@ -1,0 +1,644 @@
+:root {
+  --color-primary: #00BFFF;
+  --color-primary-dark: #009ACD;
+  --color-bg: #F5F7FA;
+  --color-white: #FFFFFF;
+  --color-text: #333333;
+  --color-text-light: #888888;
+  --color-accent: #FF6B6B;
+  --color-pink-100: #FCE7F3;
+  /* Pink-100 equivalent */
+  --font-main: 'Outfit', 'Inter', sans-serif;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --radius-lg: 24px;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--color-white);
+  min-height: 100vh;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Base Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* App Layout */
+.app-bg-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 320px;
+  background-color: var(--color-white);
+  /* Changed from pink-100 to white/transparent per user request */
+  z-index: 0;
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+}
+
+.bus-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  padding-top: 6rem;
+  /* padding-bottom: 3rem; */
+  /* Give some space at bottom before header/tabs */
+  background: linear-gradient(to bottom, #E0F2FE, #FFFFFF);
+}
+
+.bus-image {
+  width: 16rem;
+  object-fit: contain;
+  position: relative;
+  z-index: 10;
+  /* Shadow removed as per user request */
+  /* filter: drop-shadow(...) */
+}
+
+.seika-bg-image {
+  position: absolute;
+  top: -2rem;
+  right: -5rem;
+  opacity: 0.9;
+  /* Pull slightly to right edge */
+  height: 120%;
+  /* Slightly larger */
+  width: auto;
+  z-index: 0;
+  opacity: 0.3;
+  transform: translateY(-10%);
+  pointer-events: none;
+}
+
+.kokusai-bg-image {
+  position: absolute;
+  top: 0;
+  left: -3rem;
+  /* Pull slightly to left edge */
+  height: 120%;
+  width: auto;
+  z-index: 0;
+  opacity: 0.3;
+  transform: translateY(-10%);
+  pointer-events: none;
+}
+
+/* Header Component */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.header-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.date-picker {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  box-shadow: var(--shadow-card);
+}
+
+.nav-button {
+  color: #9CA3AF;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-button:hover {
+  color: var(--color-primary);
+}
+
+.date-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+/* "Back to Today" Button */
+.back-to-today-btn {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  margin-top: 0.25rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.back-to-today-btn:active {
+  transform: scale(0.95);
+}
+
+/* Tabs Component */
+.tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  /* Removed padding: 0 1rem; let the container handle it or match card margin */
+  margin-left: 1rem;
+  margin-right: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.tabs-container {
+  display: flex;
+  /* flex row */
+  width: 100%;
+  /* Removed max-width: 24rem; to match card width */
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s, color 0.2s;
+  z-index: 20;
+}
+
+.tab-inactive {
+  background-color: #E0F2FE;
+  /* Light Blue (blue-100 equivalent) */
+  color: #00BFFF;
+  /* Primary Blue Text */
+}
+
+.tab-inactive:hover {
+  background-color: #DBEAFE;
+}
+
+.tab-active {
+  background-color: var(--color-primary);
+  color: white;
+  padding-bottom: 1rem;
+  margin-bottom: -0.5rem;
+  /* Overlap */
+  box-shadow: none;
+}
+
+/* Calendar Name Header (Non-today) */
+.calendar-name-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Match tabs logic for width/margin */
+  width: 100%;
+  background-color: white;
+  /* or primary? User said replace tabs. Tabs sit on top of the card. */
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  padding: 1rem;
+  color: var(--color-primary);
+  font-weight: bold;
+  font-size: 1.25rem;
+  position: relative;
+  z-index: 20;
+  /* Make it blend with the card below? */
+  background-color: var(--color-primary);
+  color: white;
+  margin-bottom: -0.5rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Countdown Component */
+.countdown-card {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 1.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom-left-radius: 1.5rem;
+  border-bottom-right-radius: 1.5rem;
+  margin: 0 1rem;
+  text-align: center;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  z-index: 5;
+}
+
+/* Timetable Component */
+.timetable-section {
+  padding: 2rem 1rem;
+}
+
+.timetable-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  margin-left: 0.5rem;
+}
+
+.timetable-card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.timetable-header {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  background-color: #EFF6FF;
+  /* blue-50 */
+  border-bottom: 1px solid #DBEAFE;
+  /* blue-100 */
+}
+
+.timetable-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  border-bottom: 1px solid #F3F4F6;
+  min-height: 50px;
+}
+
+.timetable-row:last-child {
+  border-bottom: none;
+}
+
+.hour-cell {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  color: #1F2937;
+  background-color: rgba(249, 250, 251, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minute-cell {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #4B5563;
+  /* text-gray-600 */
+}
+
+.minute-bubble {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.minute-bubble:hover {
+  background-color: #EFF6FF;
+}
+
+/* Effects */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem 0;
+  margin-top: auto;
+  color: #9CA3AF;
+  font-size: 0.75rem;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.footer a {
+  color: #9CA3AF;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Brand Header */
+.brand-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.brand-header-inner {
+  display: flex;
+  align-items: center;
+}
+
+.brand-logo-text {
+  font-family: var(--font-main);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  letter-spacing: 0.1em;
+}
+
+.header-time {
+  font-family: 'Inter', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #6B7280;
+}
+
+/* Bus Animation */
+@keyframes bus-double-jump {
+  0% {
+    transform: translateY(0);
+  }
+
+  10% {
+    transform: translateY(-8px);
+  }
+
+  20% {
+    transform: translateY(0);
+  }
+
+  30% {
+    transform: translateY(-8px);
+  }
+
+  40% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-bus-jump {
+  animation: bus-double-jump 2s ease-in-out infinite;
+}
+
+/* PC Split Layout Styles */
+
+/* Default: Mobile First - Hide PC Overview */
+.pc-overview-container {
+  display: none;
+}
+
+.app-root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.mobile-layout-wrapper {
+  width: 100%;
+}
+
+.mobile-app-container {
+  /* Inherits current mobile styles */
+  background-color: var(--color-bg);
+  /* Ensure bg matches */
+}
+
+
+/* Desktop View */
+@media (min-width: 1024px) {
+  #root {
+    max-width: none;
+    /* Override default max-width constraint on root if present, or we handle it in app-root */
+    margin: 0;
+    box-shadow: none;
+    background: #F9FAFB;
+    /* Light gray background for the whole page */
+  }
+
+  .app-root {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    /* Prevent body scroll, scroll individually */
+  }
+
+  /* Left Side: Overview */
+  .pc-overview-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 45%;
+    padding: 4rem;
+    background-color: white;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+  }
+
+  .pc-overview-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .pc-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--color-primary);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .pc-subtitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 1rem 0;
+  }
+
+  .pc-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+  }
+
+  .pc-footer-area {
+    font-size: 0.875rem;
+    color: #999;
+  }
+
+
+  /* Right Side: Mobile App */
+  .mobile-layout-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Push content to left or center? User said "right side". usually means filling the right area. */
+    /* Implementation: Center the phone frame in this area */
+    background-color: #F3F4F6;
+    position: relative;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
+
+  .mobile-app-container {
+    width: 100%;
+    max-width: 420px;
+    /* Force mobile width */
+    height: 90vh;
+    /* Fixed height frame */
+    max-height: 850px;
+    background-color: white;
+    border-radius: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Internal scroll */
+    overflow-x: hidden;
+    position: relative;
+    border: 8px solid white;
+    /* Frame illusion */
+  }
+
+  /* Adjust fixed elements like Header/Splash to be absolute within the container */
+  .mobile-app-container .fixed {
+    position: absolute;
+    /* Change fixed to absolute relative to container */
+  }
+
+  /* Fix Splash screen to cover only the mobile container on PC */
+  .mobile-app-container .fixed.inset-0 {
+    position: absolute;
+    border-radius: 32px;
+    /* Match inner radius roughly */
+  }
+
+  /* Fix Brand Header to be absolute */
+  .brand-header {
+    position: absolute;
+    width: 100%;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+  }
+
+  /* Scrollbar hiding for cleaner look */
+  .mobile-app-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .mobile-app-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .mobile-app-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+}
