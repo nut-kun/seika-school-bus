@@ -1,16 +1,55 @@
-# React + Vite
+# seika-bus
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+京都精華大学スクールバス運行状況確認アプリ
 
-Currently, two official plugins are available:
+## サービス概要
+京都精華大学と国際会館駅間を運行するスクールバスの時刻表と運行状況を、リアルタイムで確認できるWebアプリケーションです。
+「次のバスまであと何分か」を直感的に把握できるカウントダウン機能を中心に、学生や教職員の日々の利用をサポートします。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 主な機能
+- **リアルタイムカウントダウン**: 次のバス発車までの残り時間を秒単位で表示します。
+- **運行状況の自動判定**: 大学の学年暦（iCal）データを取得・解析し、その日が「主要ダイヤ」「土曜ダイヤ」「運休」のいずれであるかを自動で判別します。
+- **方面切り替え機能**: 「国際会館駅発」と「大学発」のスケジュールをワンタップで切り替え可能です。
+- **時刻表一覧**: 当日の全運行便をリスト形式で確認できます。
+- **レスポンシブデザイン**: スマートフォンでの利用を主眼に置きつつ、PC閲覧時には分割表示レイアウト（左側に概要、右側にアプリ画面）に自動適応します。
 
-## React Compiler
+## 技術スタック
+React 19とViteを採用し、高速で軽量なフロントエンド環境を構築しています。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Core
+- **Framework**: React 19
+- **Build Tool**: Vite
 
-## Expanding the ESLint configuration
+### Styling
+- **CSS**: Custom CSS (Vanilla)
+  - CSS Variables（カスタムプロパティ）を活用したデザインシステム
+  - `Outfit`, `Inter` フォントによるモダンなタイポグラフィ
+  - BEM記法とユーティリティクラス（Utility-first）を組み合わせた設計
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Libraries
+- **date-fns**: 日時操作およびフォーマット処理
+- **ical.js**: Googleカレンダー等のiCal形式データのパース（運行スケジュールの判定に使用）
+- **framer-motion**: スムーズな画面遷移とUIアニメーション（スプラッシュ画面、バスのジャンプアニメーション等）
+
+## 開発環境のセットアップ
+
+### 推奨環境
+- Node.js (LTS recommended)
+
+### インストール
+プロジェクトのルートディレクトリで依存関係をインストールします。
+```bash
+npm install
+```
+
+### 開発サーバーの起動
+ローカル開発サーバーを立ち上げます。
+```bash
+npm run dev
+```
+
+### ビルド
+本番環境向けのビルドを行います。
+```bash
+npm run build
+```
