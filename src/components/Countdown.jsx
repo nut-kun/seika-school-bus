@@ -91,10 +91,14 @@ export default function Countdown({ currentDate, direction, status, isToday, now
     // Determine Main Content based on isToday
     const renderContent = () => {
         if (!isToday) {
-            // Future/Past Date: Show STATUS here (as header now shows DATE)
+            // Future/Past Date: Compact View
+            // User requested: "Shorten countdown-card height" and show Status/Date.
             return (
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '2rem 0' }}>
+                <div style={{ textAlign: 'center', paddingBottom: '0.5rem' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                        {format(currentDate, 'M/d')}
+                    </div>
+                    <div style={{ fontSize: '1rem', fontWeight: 500, opacity: 0.9 }}>
                         {status.message}
                     </div>
                 </div>
@@ -137,7 +141,7 @@ export default function Countdown({ currentDate, direction, status, isToday, now
     };
 
     return (
-        <div className="countdown-card">
+        <div className="countdown-card" style={!isToday ? { minHeight: 'auto', paddingBottom: '1.5rem' } : {}}>
             {/* Blobs */}
             <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '200px', height: '200px', backgroundColor: 'white', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
             <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '150px', height: '150px', backgroundColor: 'white', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%', pointerEvents: 'none' }}></div>

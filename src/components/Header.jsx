@@ -17,10 +17,24 @@ export default function Header({ currentDate, setDate, isToday, onBackToToday })
                 <button onClick={handlePrev} className="nav-button">
                     ◀
                 </button>
-                <div className="flex flex-col items-center mx-2">
-                    <span className="date-text">
+                <div className="flex flex-col items-center mx-2 relative">
+                    <span
+                        className="date-text cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => document.getElementById('date-input-hidden').showPicker()}
+                    >
                         {format(currentDate, 'M月d日 (E)', { locale: ja })}
                     </span>
+                    <input
+                        id="date-input-hidden"
+                        type="date"
+                        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', bottom: 0, left: '50%', transform: 'translateX(-50%)' }}
+                        value={format(currentDate, 'yyyy-MM-dd')}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setDate(new Date(e.target.value));
+                            }
+                        }}
+                    />
                     {!isToday && (
                         <button
                             onClick={onBackToToday}

@@ -18,30 +18,43 @@ const DEBUG_DATE = null;
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
-  // Use debug date if set, otherwise real now
   const initialDate = DEBUG_DATE ? new Date(DEBUG_DATE) : new Date();
 
   const [currentDate, setDate] = useState(initialDate);
-  const [direction, setDirection] = useState('kokusai_to_seika'); // or 'seika_to_kokusai'
+  const [direction, setDirection] = useState('kokusai_to_seika');
   const [status, setStatus] = useState({ status: 'LOADING', message: '読み込み中...' });
 
-  // Calculate if the selected date matches "Today" (Real today, or Debug today)
-  // If we rely on system time for "Today", we compare currentDate to new Date().
-  // If we are in Debug mode, maybe "Today" is the Debug Date?
-  // Let's assume "Today" means "The date currently being viewed is the same as the reference 'Now'".
-  // But usually "Back to Today" means back to Real Time.
+  // Sticky Tabs Logic
+  const [isStuck, setIsStuck] = useState(false);
+  const sentinelRef = React.useRef(null);
+
   const now = DEBUG_DATE ? new Date(DEBUG_DATE) : new Date();
   const isToday = currentDate.toDateString() === now.toDateString();
 
   useEffect(() => {
-    // Fetch status when date changes
     const loadStatus = async () => {
-      setStatus({ status: 'LOADING', message: '確認中...' });
+      setStatus({ status: 'LOADING', message: '確認中...（最大1分ほどかかる場合があります）' });
       const res = await fetchCalendarStatus(currentDate);
       setStatus(res);
     };
     loadStatus();
   }, [currentDate]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      // Trigger when sentinel (placed before Timetable) goes out of view at the top.
+      // rootMargin is -70px, so intersection ends when element is at top:70px.
+      // So if (!isIntersecting) and (top < 80), it implies it's above the trigger line.
+      if (!entry.isIntersecting && entry.boundingClientRect.top < 80) {
+        setIsStuck(true);
+      } else {
+        setIsStuck(false);
+      }
+    }, { rootMargin: '-70px 0px 0px 0px' });
+
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleBackToToday = () => {
     setDate(now);
@@ -53,7 +66,6 @@ function App() {
         {showSplash && <Splash onComplete={() => setShowSplash(false)} />}
       </AnimatePresence>
 
-      {/* Background accent */}
       <div className="app-bg-accent"></div>
 
       <BrandHeader />
@@ -79,23 +91,22 @@ function App() {
         onBackToToday={handleBackToToday}
       />
 
-      {isToday ? (
-        <DirectionTabs direction={direction} setDirection={setDirection} />
-      ) : (
-        <div className="tabs-wrapper">
-          <div className="calendar-name-container">
-            {format(currentDate, 'M/d')}
-          </div>
-        </div>
-      )}
+      <DirectionTabs
+        direction={direction}
+        setDirection={setDirection}
+        isStuck={isStuck}
+      />
 
       <Countdown
         currentDate={currentDate}
         direction={direction}
         status={status}
         isToday={isToday}
-        now={now} // Pass 'now' so Countdown uses the same reference time (especially if debug)
+        now={now}
       />
+
+      {/* Sentinel for Scroll Trigger: Placed BEFORE Timetable */}
+      <div ref={sentinelRef} style={{ height: '1px', width: '100%', marginBottom: '-1px', visibility: 'hidden' }} />
 
       <Timetable
         currentDate={currentDate}

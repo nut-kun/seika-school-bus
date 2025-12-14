@@ -201,13 +201,60 @@ body {
 .tabs-wrapper {
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  /* Allow stacking placeholder and fixed header if needed */
   margin-top: 1rem;
-  /* Removed padding: 0 1rem; let the container handle it or match card margin */
-  margin-left: 1rem;
-  margin-right: 1rem;
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
   position: relative;
-  z-index: 10;
+  /* Back to relative */
+  /* Remove sticky props from wrapper */
+  z-index: 90;
 }
+
+.tabs-container {
+  display: flex;
+  /* flex row */
+  width: 100%;
+  /* Removed max-width: 24rem; to match card width */
+  /* Default static style */
+  padding: 0;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* FIXED State Active (Applied to tabs-container) */
+.tabs-container.is-stuck-fixed {
+  position: fixed;
+  top: 3.5rem;
+  /* BrandHeader Height approx */
+  left: 0;
+  right: 0;
+  z-index: 900;
+  /* High z-index */
+
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* Ensure it doesn't expand too wide on PC if wrapper was constrained,
+     but user said "Fixed Header" which usually means full width.
+     If PC layout constraint is needed, we need to match max-width of app.
+     App max-width is 480px or 420px.
+     We should stick to max-width: 480px and margin: 0 auto like #root?
+  */
+  max-width: 480px;
+  margin: 0 auto;
+  /* To center it if screen is wider */
+}
+
+/* Actually, tabs-container is the inner part. */
+/* To make it look like a fixed header, we might need a backdrop filter or bg color on the wrapper? */
+/* But strictly speaking, the user said "make the switching tab a fixed header". */
+/* If I just stick the buttons, it looks okay. */
+
 
 .tabs-container {
   display: flex;
@@ -250,29 +297,38 @@ body {
   box-shadow: none;
 }
 
-/* Calendar Name Header (Non-today) */
-.calendar-name-container {
+/* Calendar Status Header (Compact) */
+.calendar-status-header {
   display: flex;
-  justify-content: center;
   align-items: center;
-  /* Match tabs logic for width/margin */
-  width: 100%;
-  background-color: white;
-  /* or primary? User said replace tabs. Tabs sit on top of the card. */
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
-  padding: 1rem;
-  color: var(--color-primary);
-  font-weight: bold;
-  font-size: 1.25rem;
-  position: relative;
-  z-index: 20;
-  /* Make it blend with the card below? */
+  justify-content: center;
+  gap: 0.75rem;
   background-color: var(--color-primary);
   color: white;
-  margin-bottom: -0.5rem;
-  padding-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  padding-bottom: 2rem;
+  /* Extend down to go behind tabs */
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  width: auto;
+  min-width: 200px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
+
+.status-date {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.status-message {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+/* Updated Calendar Name Container - Deprecated or repurposed? */
+/* The user asked to "shorten the blue area" and add tabs. */
+/* We replaced the old big block with the smaller .calendar-status-header inside .tabs-wrapper */
 
 /* Countdown Component */
 .countdown-card {

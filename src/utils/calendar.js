@@ -100,18 +100,29 @@ export const fetchCalendarStatus = async (date) => {
 
         // Check keywords
         // Priority: Suspended > Special > Normal
-        const isSuspended = todaysEvents.some(e => e.summary.includes('運休'));
-        const isSpecial = todaysEvents.some(e => e.summary.includes('特別運行'));
-        const isNormal = todaysEvents.some(e => e.summary.includes('通常運行'));
+        // Helper to find the matching event
+        const suspendedEvent = todaysEvents.find(e => e.summary.includes('運休'));
+        const specialEvent = todaysEvents.find(e => e.summary.includes('特別運行'));
+        const normalEvent = todaysEvents.find(e => e.summary.includes('通常運行'));
 
-        if (isSuspended) {
-            return { status: 'SUSPENDED', message: '運休です。', url: null };
+        if (suspendedEvent) {
+            return { status: 'SUSPENDED', message: suspendedEvent.summary, url: null };
         }
-        if (isSpecial) {
-            return { status: 'SPECIAL', message: '特別運行日です。サイトをご覧ください。', url: 'https://www.kyoto-seika.ac.jp/bus.html' };
+        if (specialEvent) {
+            return { status: 'SPECIAL', message: specialEvent.summary, url: 'https://www.kyoto-seika.ac.jp/bus.html' };
         }
-        if (isNormal) {
-            return { status: 'NORMAL', message: '通常運行です', url: null };
+        if (normalEvent) {
+            // Check if it is Saturday Normal
+            // If the summary contains (土曜), we might want to pass that info?
+            // User said: "Normally show 'Normal Schedule (Saturday)'"
+            // If the event name already has it, we can just use the summary.
+            // But usually the message was hardcoded "通常運行です".
+            // Since user wants "Normal Schedule", let's use the summary if it looks reasonable, or keep "通常運行です" but check if Saturday.
+            // Actually, if we just return the summary, it will be "通常運行" or "通常運行（土曜日）" depending on the calendar event.
+            // Let's rely on the calendar event name for now if it exists, as that's what the user asked for special days.
+            // But "Normal" might need to be just "通常運行です" if the event is just "通常ダイヤ".
+            // Let's return the summary for flexibility.
+            return { status: 'NORMAL', message: normalEvent.summary, url: null };
         }
 
         // Default fallback if no events found: Assume Normal or Check if weekend?

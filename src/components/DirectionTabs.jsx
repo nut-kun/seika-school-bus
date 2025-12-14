@@ -1,12 +1,20 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function DirectionTabs({ direction, setDirection }) {
+export default function DirectionTabs({ direction, setDirection, isStuck }) {
+    // Props: isStuck passed from App (based on Timetable sentinel)
 
     return (
-        <div className="tabs-wrapper">
-            <div className="tabs-container">
+        <div className="tabs-wrapper" style={{ position: 'relative' }}>
+            {/* Placeholder: occupies space at the ORIGINAL location when tabs are fixed away */}
+            {isStuck && (
+                <div className="tabs-placeholder" style={{ height: '56px', width: '100%' }}></div>
+            )}
+
+            {/* Actual Tabs */}
+            <div
+                className={`tabs-container ${isStuck ? 'is-stuck-fixed' : ''}`}
+            >
                 <button
                     onClick={() => setDirection('kokusai_to_seika')}
                     className={`tab-button ${direction === 'kokusai_to_seika' ? 'tab-active' : 'tab-inactive'}`}
@@ -16,9 +24,6 @@ export default function DirectionTabs({ direction, setDirection }) {
                         <motion.div
                             layoutId="activeTab"
                             className="line-indicator"
-                            // Note: 'line-indicator' style is not critical if we use bg color change, 
-                            // but we can add it to CSS if we want the line. 
-                            // The CSS 'tab-active' handles the big block style nicely.
                             style={{
                                 position: 'absolute',
                                 bottom: 0,
