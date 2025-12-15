@@ -11,7 +11,7 @@ import busImage from './assets/bus.png';
 import seikaImage from './assets/seika.png';
 import kokusaiImage from './assets/kokusaikaikan.png';
 import { format } from 'date-fns';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // DEBUG: Set a specific date string (e.g., '2025-12-25T08:00:00') to test specific times. Set null to use real time.
 const DEBUG_DATE = null;
@@ -71,12 +71,32 @@ function App() {
       <BrandHeader />
 
       <div className="bus-container">
-        {isToday && direction === 'seika_to_kokusai' && (
-          <img src={seikaImage} alt="Seika Background" className="seika-bg-image" />
-        )}
-        {isToday && direction === 'kokusai_to_seika' && (
-          <img src={kokusaiImage} alt="Kokusai Background" className="kokusai-bg-image" />
-        )}
+        <AnimatePresence mode="wait">
+          {status.status !== 'SUSPENDED' && direction === 'seika_to_kokusai' && (
+            <motion.img
+              key="seika-bg"
+              src={seikaImage}
+              alt="Seika Background"
+              className="seika-bg-image"
+              initial={{ opacity: 0, scale: 0.9, x: -30 }}
+              animate={{ opacity: 0.3, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: -30 }} // Fade out back to center-ish
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          )}
+          {status.status !== 'SUSPENDED' && direction === 'kokusai_to_seika' && (
+            <motion.img
+              key="kokusai-bg"
+              src={kokusaiImage}
+              alt="Kokusai Background"
+              className="kokusai-bg-image"
+              initial={{ opacity: 0, scale: 0.9, x: 30 }}
+              animate={{ opacity: 0.3, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 30 }} // Fade out back to center-ish
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
         <img
           src={busImage}
           alt="Bus Illustration"

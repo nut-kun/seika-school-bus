@@ -43,6 +43,10 @@ const decodeId = (id) => {
     }
 };
 
+// Cache for events to avoid re-fetching
+let cachedEvents = null;
+let fetchPromise = null;
+
 export const fetchCalendarStatus = async (date) => {
     // Determine status for the given date
     // Returns: { status: 'NORMAL' | 'SPECIAL' | 'SUSPENDED', message: string, url: string | null }
@@ -50,57 +54,67 @@ export const fetchCalendarStatus = async (date) => {
     // CORS Proxy
     const PROXY = "https://api.allorigins.win/raw?url=";
 
-    let foundStatus = null;
-
     try {
-        const calendarIds = RAW_SRC_IDS.map(decodeId);
+        // Use cache if available
+        if (!cachedEvents) {
+            // If a fetch is already in progress, reuse the promise
+            if (!fetchPromise) {
+                fetchPromise = (async () => {
+                    const calendarIds = RAW_SRC_IDS.map(decodeId);
 
-        // We check all calendars. The "School Bus" status usually resides in one.
-        // We look for keywords in events on that day.
+                    // Fetch all calendars in parallel
+                    const promises = calendarIds.map(async (calId) => {
+                        const url = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calId)}/public/basic.ics`;
+                        try {
+                            // Add cache buster or handling if needed, but for now standard fetch
+                            const res = await fetch(`${PROXY}${encodeURIComponent(url)}`);
+                            if (!res.ok) return [];
+                            const text = await res.text();
+                            const jcalData = ICAL.parse(text);
+                            const comp = new ICAL.Component(jcalData);
+                            const vevents = comp.getAllSubcomponents('vevent');
+
+                            return vevents.map(event => {
+                                const ev = new ICAL.Event(event);
+                                return {
+                                    summary: ev.summary,
+                                    startDate: ev.startDate.toJSDate(),
+                                    endDate: ev.endDate.toJSDate(),
+                                    description: ev.description
+                                };
+                            });
+                        } catch (e) {
+                            console.warn(`Failed to fetch/parse calendar ${calId}`, e);
+                            return [];
+                        }
+                    });
+
+                    const results = await Promise.all(promises);
+                    return results.flat();
+                })();
+            }
+
+            try {
+                cachedEvents = await fetchPromise;
+            } finally {
+                // Keep the cache, but clear promise so we don't hold it if it failed (though we catch inside)
+                fetchPromise = null;
+            }
+        }
+
+        const allEvents = cachedEvents || [];
 
         const checkDateStart = startOfDay(new Date(date));
         const checkDateEnd = endOfDay(new Date(date));
 
-        // For performance, we could race them or Promise.all.
-        // Fetching ical files is heavy (they contain all history).
-        // But usually universities don't have HUGE calendars.
-
-        const promises = calendarIds.map(async (calId) => {
-            const url = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calId)}/public/basic.ics`;
-            const res = await fetch(`${PROXY}${encodeURIComponent(url)}`);
-            if (!res.ok) return [];
-            const text = await res.text();
-            const jcalData = ICAL.parse(text);
-            const comp = new ICAL.Component(jcalData);
-            const vevents = comp.getAllSubcomponents('vevent');
-
-            return vevents.map(event => {
-                const ev = new ICAL.Event(event);
-                return {
-                    summary: ev.summary,
-                    startDate: ev.startDate.toJSDate(),
-                    endDate: ev.endDate.toJSDate(),
-                    description: ev.description
-                };
-            });
-        });
-
-        const results = await Promise.all(promises);
-        const allEvents = results.flat();
-
         // Filter for today
         const todaysEvents = allEvents.filter(ev => {
             // Check overlap: [start, end) intersects [checkStart, checkEnd]
-            // iCal events are usually exclusive on endDate.
-            // checkDateEnd is end of today (23:59:59.999)
-            // Logic: Event must start before Today ends, AND Event must end after Today starts.
-
             return ev.startDate <= checkDateEnd && ev.endDate > checkDateStart;
         });
 
         // Check keywords
         // Priority: Suspended > Special > Normal
-        // Helper to find the matching event
         const suspendedEvent = todaysEvents.find(e => e.summary.includes('運休'));
         const specialEvent = todaysEvents.find(e => e.summary.includes('特別運行'));
         const normalEvent = todaysEvents.find(e => e.summary.includes('通常運行'));
@@ -112,28 +126,9 @@ export const fetchCalendarStatus = async (date) => {
             return { status: 'SPECIAL', message: specialEvent.summary, url: 'https://www.kyoto-seika.ac.jp/bus.html' };
         }
         if (normalEvent) {
-            // Check if it is Saturday Normal
-            // If the summary contains (土曜), we might want to pass that info?
-            // User said: "Normally show 'Normal Schedule (Saturday)'"
-            // If the event name already has it, we can just use the summary.
-            // But usually the message was hardcoded "通常運行です".
-            // Since user wants "Normal Schedule", let's use the summary if it looks reasonable, or keep "通常運行です" but check if Saturday.
-            // Actually, if we just return the summary, it will be "通常運行" or "通常運行（土曜日）" depending on the calendar event.
-            // Let's rely on the calendar event name for now if it exists, as that's what the user asked for special days.
-            // But "Normal" might need to be just "通常運行です" if the event is just "通常ダイヤ".
-            // Let's return the summary for flexibility.
             return { status: 'NORMAL', message: normalEvent.summary, url: null };
         }
 
-        // Default fallback if no events found: Assume Normal or Check if weekend?
-        // User said: "If normal, use site time. If special, link. If suspended, show suspended."
-        // If nothing found, maybe it's a normal day without explicit event?
-        // But usually schedule has "Class Day" etc.
-        // For safety, if WEEKEND (Sat/Sun), check schedule.
-        // We'll return UNKNOWN or NORMAL.
-        // Let's return NORMAL but with caution?
-        // Actually, if no event says "Normal", it might be a holiday.
-        // We will default to 'NORMAL' for the demo but user might want to check this.
         return { status: 'NORMAL', message: '通常運行です', url: null };
 
     } catch (error) {

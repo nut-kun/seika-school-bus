@@ -10,45 +10,89 @@ export default function Countdown({ currentDate, direction, status, isToday, now
     const [timeLeft, setTimeLeft] = useState('');
 
     useEffect(() => {
+        // Initial setup
         const update = () => {
-            const bus = getNextBus(currentDate, direction);
+            // If isToday, we should use the current REAL time (or debug time) for the schedule lookup
+            // otherwise we use the static currentDate (which might be 00:00 of a future date, or a fixed time)
+            const baseTime = isToday ? (now || new Date()) : currentDate;
+            const bus = getNextBus(baseTime, direction);
             setNextBus(bus);
         };
         update();
-        const interval = setInterval(update, 1000);
-        return () => clearInterval(interval);
-    }, [currentDate, direction]);
+
+        // We don't need a separate interval here if the main tick handles updates
+        // But the main tick depends on 'nextBus' existing.
+    }, [currentDate, direction, isToday, now]);
 
     useEffect(() => {
-        if (!nextBus) { // Simplified condition: removed nextBus.type === 'interval' || !isToday
-            setTimeLeft('');
-            return;
-        }
-
+        // Main Loop
         const startReal = Date.now();
         const startVirtual = now.getTime();
 
         const tick = () => {
-            // Calculate virtual current time based on elapsed real time
-            // This ensures we respect DEBUG_DATE (passed as 'now') while keeping the countdown ticking
             const elapsed = Date.now() - startReal;
             const currentMoment = new Date(startVirtual + elapsed);
 
-            const diff = differenceInSeconds(nextBus.nextTime, currentMoment);
+            // If we don't have a next bus, or if we are today, we should constantly check for the next bus?
+            // Actually, if we have a next bus, we count down TO it.
+            // If we don't, we might need to find one.
 
-            if (diff <= 0) {
-                setTimeLeft('00:00');
+            // Re-evaluating next bus inside loop only if needed
+            let currentTargetBus = nextBus;
+
+            // If isToday, we want to ensure we are always targeting the correct future bus
+            // The 'update' effect above sets the initial one.
+            // If time passes and that bus is gone, we need a new one.
+
+            if (isToday) {
+                // Check if current target is invalid or expired
+                // But we can't easily access 'nextBus' state here without it being in deps (which restarts interval).
+                // Instead, let's calculate the target bus directly here if we are "live".
+                // BUT 'getNextBus' might change the 'nextBus' object ref, causing loop if we set state every tick.
+
+                // Strategy: Calculate 'diff' against the 'nextBus' from state.
+                // If diff <= 0, we Re-Fetch next bus using currentMoment.
+                // If that new bus is different, we setTimeLeft AND setNextBus?
+                // We can't setNextBus inside the tick loop easily without layout thrashing or complexity.
+
+                // Simpler: 
+                // Just check 'diff'.
+                if (currentTargetBus) {
+                    const diff = differenceInSeconds(currentTargetBus.nextTime, currentMoment);
+                    if (diff <= 0 && isToday) {
+                        // Bus departed. Find next one.
+                        const newBus = getNextBus(currentMoment, direction);
+                        // If we found a NEW bus (different time), update state
+                        if (newBus && newBus.nextTime.getTime() !== currentTargetBus.nextTime.getTime()) {
+                            setNextBus(newBus);
+                            // The next tick will handle the time left for THIS new bus
+                            return;
+                        }
+                    }
+
+                    if (diff <= 0) {
+                        setTimeLeft('00:00');
+                    } else {
+                        const m = Math.floor(diff / 60);
+                        const s = diff % 60;
+                        setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+                    }
+                }
             } else {
-                const m = Math.floor(diff / 60);
-                const s = diff % 60;
-                setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+                // Not today: Logic handled by initial fetch usually
+                if (currentTargetBus) {
+                    // Static countdown? Probably not needed for future dates as per requirements (simplified view).
+                    // But if we did:
+                    const diff = differenceInSeconds(currentTargetBus.nextTime, currentMoment);
+                    // ... logic
+                }
             }
         };
 
-        tick(); // Initial call
+        tick();
         const timer = setInterval(tick, 1000);
         return () => clearInterval(timer);
-    }, [nextBus, now]); // Added 'now' to dependencies to reset if reference time changes
+    }, [nextBus, now, isToday, direction]); // Added dependencies to reset timer when bus changes
 
 
     if (status.status === 'LOADING') {
